@@ -1,0 +1,8 @@
+prefix=/home/swarm/catkin_ws/src/swarm_pathfinding/build/devel
+
+Name: swarm_pathfinding
+Description: Description of swarm_pathfinding
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

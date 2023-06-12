@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/swarm/catkin_ws/src/swarm_pathfinding/build/devel/setup.sh
