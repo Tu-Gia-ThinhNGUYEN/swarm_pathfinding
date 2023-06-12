@@ -38,6 +38,7 @@ def make_plan(req):
   requests from clients. It returns a msg of type PathPlanningPluginResponse
   ''' 
   global previous_plan_variables, optimalPath, initial_path, runningPath, x, y, numberOfStations, path_array
+  rospy.loginfo(str(req.costmap_ros))
   # costmap as 1-D array representation
   costmap = req.costmap_ros
   # number of columns in the occupancy grid
