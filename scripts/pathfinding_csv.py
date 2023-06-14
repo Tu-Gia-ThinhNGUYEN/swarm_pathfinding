@@ -18,6 +18,7 @@ x_odom = 0.0
 y_odom = 0.0
 initial_path = []
 runningPath = 0
+initial_pathcost = 0.0
 
 pos_csv = '/home/swarm/catkin_ws/src/swarm_choosestation/csv/pos.csv'
 path_package = '/home/swarm/catkin_ws/src/swarm_pathfinding'
@@ -37,8 +38,7 @@ def make_plan(req):
   Callback function used by the service server to process
   requests from clients. It returns a msg of type PathPlanningPluginResponse
   ''' 
-  global previous_plan_variables, optimalPath, initial_path, runningPath, x, y, numberOfStations, path_array
-  rospy.loginfo(str(req.costmap_ros))
+  global previous_plan_variables, optimalPath, initial_path, runningPath, x, y, numberOfStations, path_array, initial_pathcost
   # costmap as 1-D array representation
   costmap = req.costmap_ros
   # number of columns in the occupancy grid
@@ -50,7 +50,7 @@ def make_plan(req):
   # side of each grid map square in meters
   resolution = 0.05
   # origin of grid map
-  origin = [-10, -10, 0]
+  origin = [-9.6, -9.6, 0]
   x = []
   y = []
   fieldnames = ['x', 'y', 'z']
@@ -78,8 +78,10 @@ def make_plan(req):
   d = np.zeros((len(x),len(x)))
   rospy.loginfo('**********************Start*****************')
   # First run to find path from robot to first node
-  start_index = (200+int(y_odom/0.05))*width + (200+int(x_odom/0.05))
-  goal_index = (200+int(y[0]/0.05))*width + (200+int(x[0]/0.05))
+  start_index = int((round(abs(origin[0]/resolution))+int(y_odom/0.05))*width + (round(abs(origin[1]/resolution))+int(x_odom/0.05)))
+  goal_index = int((round(abs(origin[0]/resolution))+int(y[0]/0.05))*width + (round(abs(origin[1]/resolution))+int(x[0]/0.05)))
+  # rospy.loginfo("start :" + str(start_index) + " " + str(type(start_index)))
+  # rospy.loginfo("start :" + str(goal_index) + " " + str(type(goal_index)))
   viz = GridViz(costmap, resolution, origin, start_index, goal_index, width)
   # time statistics
   start_time = rospy.Time.now()
@@ -119,8 +121,8 @@ def make_plan(req):
   for i in range(0, len(x)):
     for j in range(0, len(y)):
       if i != j:
-        start_index = (200+int(y[i]/0.05))*width + (200+int(x[i]/0.05))
-        goal_index = (200+int(y[j]/0.05))*width + (200+int(x[j]/0.05))
+        start_index = int((round(abs(origin[0]/resolution))+int(y[i]/0.05))*width + (round(abs(origin[1]/resolution))+int(x[i]/0.05)))
+        goal_index = int((round(abs(origin[0]/resolution))+int(y[j]/0.05))*width + (round(abs(origin[1]/resolution))+int(x[j]/0.05)))
         viz = GridViz(costmap, resolution, origin, start_index, goal_index, width)
         # time statistics
         start_time = rospy.Time.now()
