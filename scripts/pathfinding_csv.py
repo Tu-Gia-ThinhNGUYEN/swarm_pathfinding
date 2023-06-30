@@ -20,8 +20,8 @@ initial_path = []
 runningPath = 0
 initial_pathcost = 0.0
 
-pos_csv = '/home/swarm/catkin_ws/src/swarm_choosestation/csv/pos.csv'
-path_package = '/home/swarm/catkin_ws/src/swarm_pathfinding'
+pos_csv = '/home/swarmpc/catkin_ws/src/swarm_choosestation/csv/pos.csv'
+path_package = '/home/swarmpc/catkin_ws/src/swarm_pathfinding'
 path_distanceMatrix = path_package+'/json/distanceMatrix.json'
 path_pathTemp = path_package + '/json/pathTemp.json'
 path_pathArray = path_package + '/json/pathArray.json'

@@ -75,7 +75,7 @@ def clean_shutdown():
 
 if __name__ == '__main__':
   rospy.init_node('path_planning_service_server', log_level=rospy.INFO, anonymous=False)
-  make_plan_service = rospy.Service("/move_base/SrvClientPlugin/make_plan", PathPlanningPlugin, make_plan)
+  make_plan_service = rospy.Service("sw1/move_base/SrvClientPlugin/make_plan", PathPlanningPlugin, make_plan)
   cmd_vel = rospy.Publisher('sw1/cmd_vel', Twist, queue_size=5)
   rospy.on_shutdown(clean_shutdown)
 

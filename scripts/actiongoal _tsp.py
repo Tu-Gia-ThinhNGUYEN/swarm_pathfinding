@@ -54,9 +54,6 @@ def movebase_client(index):
     roll = 0.0
     pitch = 0.0
     yaw = math.atan2(y_nextstation-y_currentsation,x_nextstation-x_currentsation)
-    qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-    qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
-    qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
     qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
 
     client = actionlib.SimpleActionClient('sw1/move_base',MoveBaseAction)
@@ -67,9 +64,6 @@ def movebase_client(index):
     goal.target_pose.header.stamp = rospy.Time.now()
     goal.target_pose.pose.position.x = x_currentsation
     goal.target_pose.pose.position.y = y_currentsation
-    goal.target_pose.pose.orientation.x = qx
-    goal.target_pose.pose.orientation.y = qy
-    goal.target_pose.pose.orientation.z = qz
     goal.target_pose.pose.orientation.w = qw
     rospy.loginfo("Station is being excuted:")
     rospy.loginfo("x: " + str(x_currentsation)+"       y: "+str(y_currentsation)+"     qw: "+str(qw))
@@ -88,16 +82,15 @@ print("Stations: " + str(stations))
 if __name__ == '__main__':
     try:
         rospy.init_node('movebase_client_py')
-        while index < len(stations[0][0]):
-            result = movebase_client(stations[0][0][index][0])
-            if result:
-                rospy.loginfo("Station " + str(stations[0][0][index][0]+1) + " execution done!")
-                index = index + 1
-            else:
-                rospy.loginfo("TSP fail")
-                break
-            rospy.sleep(1)
-        result = movebase_client(-1)
+        # while index < len(stations[0][0]):
+        #     result = movebase_client(stations[0][0][index][0])
+        #     if result:
+        #         rospy.loginfo("Station " + str(stations[0][0][index][0]+1) + " execution done!")
+        #         index = index + 1
+        #     else:
+        #         rospy.loginfo("TSP fail")
+        #         break
+        result = movebase_client(0)
         if result:
             rospy.loginfo("TSP done!")
     except rospy.ROSInterruptException:
