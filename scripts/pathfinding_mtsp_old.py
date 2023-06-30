@@ -10,8 +10,7 @@ import numpy as np
 from algorithms.ant_colony import AntColony
 import csv
 import json
-import math
-from algorithms.mTSP_ACO import *
+from scripts.algorithms.mtsp_ACO_old import *
 
 previous_plan_variables = None
 count = 0
@@ -22,22 +21,22 @@ initial_path = []
 runningPath = 0
 initial_pathcost = 0.0
 
+# Parameters of ACO
+miter = 100
+m = 100
+sales = 3
+depot = 1
+p = 0.15
+alpha = 2
+beta = 4
+
 pos_csv = '/home/swarm/catkin_ws/src/swarm_choosestation/csv/pos.csv'
-path_package = '/home/swarm/catkin_ws/src/swarm_pathfinding/json/mTSP'
+path_package = '/home/swarm/catkin_ws/src/swarm_pathfinding/json/mtsp'
 path_distanceMatrix = path_package+'/distanceMatrix.json'
 path_pathTemp = path_package + '/pathTemp.json'
 path_pathArray = path_package + '/pathArray.json'
 path_pathComponent = path_package + '/pathComponent.json'
 path_opttimalPath = path_package + '/opttimalPath.json'
-
-# Parameters of ACO
-miter = 100
-m = 100
-v = 3
-depot = 1
-p = 0.15
-alpha = 2
-beta = 4
 
 def odometryCb(msg):
   global x_odom, y_odom
@@ -76,17 +75,11 @@ def make_plan(req):
     y = [float(y) for y in y]
     rospy.sleep(1)
   numberOfStations = len(x)
-  n = numberOfStations
-  sales = round((n-1)/v)
-  if (n-1)%v != 0:
-      sales = sales + 1
-  sales = int(sales)
-  print(sales)
   json_distanceMatrix = {"d"+str(i)+str(j): [] for i in range(1, numberOfStations) for j in range(1, numberOfStations)}
   json_pathTemp = {"p"+str(i)+str(j): [] for i in range(1, numberOfStations) for j in range(1, numberOfStations)}
   json_pathComponent = {"p"+str(i): [] for i in range(1, numberOfStations)}
   json_opttimalPath = {"p": []}
-  json_pathArray = {"p": []}
+  json_pathArray = {"p"+str(i): [] for i in range(1, sales)}
   rospy.loginfo('Data read from file ' + str(pos_csv))
   rospy.loginfo('Data read complete!')
   rospy.loginfo('x: ' + str(x))
@@ -166,29 +159,15 @@ def make_plan(req):
   rospy.loginfo('******** A* Done ********')
   rospy.loginfo('########### Ant Colony Optimization Start ###########')
 
-  generalPath,pathOfmTSP,minDistance = mainACO(miter,m,sales,depot,p,alpha,beta,d,v)
-
-  # json_pathArray["p"] = pathOfmTSP.append(minDistance)
-  # print (pathOfmTSP)
-  # shortestPath = []
-  # for i in range(0,sales):
-  #     shortestPath.append(pathOfmTSP[i])
-  #     json_pathComponent["p"+str(i+1)] = pathOfmTSP[i]
-  # optimalPath = shortestPath
-  # json_opttimalPath["p"] = list(generalPath)
-  # # Serializing json
-  # object_distanceMatrix = json.dumps(json_distanceMatrix, indent=numberOfStations**2)
-  # object_pathTemp = json.dumps(json_pathTemp, indent=numberOfStations**2)
-  # object_pathArray = json.dumps(json_pathArray, indent=1)
-  # object_pathComponent = json.dumps(json_pathComponent, indent=numberOfStations)
-  # object_generalPath = json.dumps(json_opttimalPath, indent=1)
-
+  path_array,path_general = mainACO(miter,m,sales,depot,p,alpha,beta,d)
+  print(path_array)
+  print(path_general)
   for i in range(0, sales):
-    json_pathArray["p"+str(i+1)] = list(pathOfmTSP[i])
+    json_pathArray["p"+str(i+1)] = list(path_array[i,:])
   shortestPath = []
-  for i in range(0,len(generalPath)-1):
-      shortestPath.extend(pathTemp[generalPath[i]-1][generalPath[i+1]-1])
-      json_pathComponent["p"+str(i+1)] = pathTemp[generalPath[i]-1][generalPath[i+1]-1]
+  for i in range(0,len(path_general)-1):
+      shortestPath.extend(pathTemp[path_general[i]-1][path_general[i+1]-1])
+      json_pathComponent["p"+str(i+1)] = pathTemp[path_general[i]-1][path_general[i+1]-1]
   optimalPath = shortestPath
   json_opttimalPath["p"] = shortestPath
   # Serializing json
@@ -197,7 +176,6 @@ def make_plan(req):
   object_pathArray = json.dumps(json_pathArray, indent=sales)
   object_pathComponent = json.dumps(json_pathComponent, indent=numberOfStations)
   object_opttimalPath = json.dumps(json_opttimalPath, indent=1)
-
   # Writing to sample.json
   with open(path_distanceMatrix, "w") as outfile:
     outfile.write(object_distanceMatrix)
@@ -210,9 +188,9 @@ def make_plan(req):
   with open(path_opttimalPath, "w") as outfile:
     outfile.write(object_opttimalPath)
   rospy.loginfo('Optimal path: ' + str(shortestPath))
-  rospy.loginfo('Optimal path cost: ' + str(minDistance))
+  rospy.loginfo('Optimal path cost: ' + str(path_array[1]))
   rospy.loginfo('Initial path cost: ' + str(initial_pathcost))
-  rospy.loginfo('Total of path cost: ' + str(minDistance+initial_pathcost))
+  rospy.loginfo('Total of path cost: ' + str(path_array[1]+initial_pathcost))
   rospy.loginfo('########### Ant Colony Optimization Done ###########')
 
   resp = PathPlanningPluginResponse()
